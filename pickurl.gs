@@ -58,7 +58,6 @@ function input_spreadsheet_id(){
     
     default:{
       var response = global.url_order( url, [], [[ "og_title", "xpath", '//meta[@property="og:title"]' ], [ "title", "xpath", '//title' ]] );
-      ogas.log.dbg( ogas.json.encode( response ) );
       if ( 0 < response.results.og_title.length ){
         title = response.results.og_title[ 0 ].attributes.content;
       }else{
