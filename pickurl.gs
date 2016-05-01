@@ -56,6 +56,11 @@ function input_spreadsheet_id(){
       title = response.results.title[ 0 ].inner_html;
     }break;
     
+    case "www.dlsite.com":{
+      var response = global.url_order( url, [[ "click", '//input[@id="btn_yes"]' ]], [[ "title", "xpath", '//span[@itemprop="title"]' ]] );
+      title = response.results.title.pop().inner_html;
+    }break;
+    
     default:{
       var response = global.url_order( url, [], [[ "og_title", "xpath", '//meta[@property="og:title"]' ], [ "title", "xpath", '//title' ]] );
       if ( 0 < response.results.og_title.length ){
@@ -207,7 +212,7 @@ global.Application.prototype.on_sheet_config = function( sheet ){
 global.Application.prototype.on_sheet_rules = function( sheet ){
   if ( "" === ogas.sheet.range( sheet, "A1" ).getValue() ){
     ogas.sheet.add_row( sheet, [ "name", "pattern", "flags" ] );
-    ogas.sheet.add_row( sheet, [ "url",  "(http|https):\/\/([a-zA-Z0-9\.\/?_=&-]+)" ] );
+    ogas.sheet.add_row( sheet, [ "url",  "(http|https):\/\/([a-zA-Z0-9\.\/?_=&%-]+)" ] );
     ogas.sheet.add_row( sheet, [ "rule", "ルール" ] );
   }
   
