@@ -31,7 +31,7 @@ function setup(){
       "token"     : "",
     });
   }catch ( err ){
-    ogas.log.err( ogas.string.format( "{0}\n{1}", err, err.stack ) );
+    ogas.log.err( ogas.string.format( "{0}\n{1}", err.toString(), err.stack ) );
   }
 }
 
@@ -41,37 +41,29 @@ function input_spreadsheet_id(){
 
 (function( action ){
   action.on_url = function( params ){
-    var title = "";
     var url = params.match.matches[ 0 ];
+    var request_orders = [];
+    var response_orders = [[ "og_title", "xpath", '//meta[@property="og:title"]' ], [ "title", "xpath", '//title' ]];
+    
     var parsed_url = global.url_parse( url );
     switch ( parsed_url.host ){
     case "www.toranoana.jp":{
-      var response = global.url_order( url, [[ "click", '//input[@value="はい"]' ]], [[ "title", "xpath", '//td[@class="DetailData_L"]' ]] );
-      title = response.results.title[ 0 ].inner_html;
+      request_orders.push( [ "click", '//input[@value="はい"]' ] );
+      response_orders.push( [ "title", "xpath", '//td[@class="DetailData_L"]' ] );
     }break;
     
     case "www.melonbooks.co.jp":{
       url = ogas.string.format( "{0}&adult_view=1", url );
-      var response = global.url_order( url, [], [[ "title", "xpath", '//table[@class="stripe"]/tbody/tr/td' ]] );
-      title = response.results.title[ 0 ].inner_html;
+      response_orders.push( [ "title", "xpath", '//table[@class="stripe"]/tbody/tr/td' ] );
     }break;
     
     case "www.dlsite.com":{
-      var response = global.url_order( url, [[ "click", '//input[@id="btn_yes"]' ]], [[ "title", "xpath", '//span[@itemprop="title"]' ]] );
-      title = response.results.title.pop().inner_html;
-    }break;
-    
-    default:{
-      var response = global.url_order( url, [], [[ "og_title", "xpath", '//meta[@property="og:title"]' ], [ "title", "xpath", '//title' ]] );
-      if ( 0 < response.results.og_title.length ){
-        title = response.results.og_title[ 0 ].attributes.content;
-      }else{
-        title = response.results.title[ 0 ].inner_html;
-      }
+      request_orders.push( [ "click", '//input[@id="btn_yes"]' ] );
     }break;
     }
     
-    if ( "" === title ) title = ogas.string.format( "Not found title: {0}", url );
+    var results = global.url_order( url, request_orders, response_orders ).results;
+    var title = ( 0 < results.og_title.length ) ? results.og_title[ 0 ].attributes.content : results.title[ 0 ].inner_html;
     global.slack_post( title );
     
     params.is_update = false;
@@ -91,10 +83,7 @@ function input_spreadsheet_id(){
 //ogas.log.dbg( ogas.json.encode( request ) );
     var response = {};
     var params = {
-      "request" : {
-        "time"      : request.time,
-        "user_name" : request.user_name
-      },
+      "request" : request,
       "is_update" : true,
     };
     var matches = ogas.pattern.matches( "action", request.text );
