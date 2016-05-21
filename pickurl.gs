@@ -49,12 +49,10 @@ function input_spreadsheet_id(){
     switch ( parsed_url.host ){
     case "www.toranoana.jp":{
       request_orders.push( [ "click", '//input[@value="はい"]' ] );
-      response_orders.push( [ "title", "xpath", '//td[@class="DetailData_L"]' ] );
     }break;
     
     case "www.melonbooks.co.jp":{
       url = ogas.string.format( "{0}&adult_view=1", url );
-      response_orders.push( [ "title", "xpath", '//table[@class="stripe"]/tbody/tr/td' ] );
     }break;
     
     case "www.dlsite.com":{
